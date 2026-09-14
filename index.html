@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tri-Hybrid Buoy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <video autoplay muted loop id="bgVideo">
+    <source src="oceanvid.mp4" type="video/mp4">
+  </video>
+  <div class="login-card">
+    <div class="brand-mark">
+      <img src="logotrihybrid.png" width="100" height="100">
+      <div><div class="name">TRI‑HYBRID BUOY</div>
+      <div class="sub">Energy Conversion with Environmental Monitoring</div></div>
+    </div>
+    <hr class="divider">
+    <h1>SIGN IN TO CONTINUE</h1>
+    <p class="hint">Sign in as admin to modify thresholds and device settings, or continue as a viewer to watch live readings.</p>
+    <div class="field">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" type="text" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-msg" id="loginMsg"></div>
+    <button class="btn" id="loginBtn">Sign in</button>
+    <div class="guest-row">
+      <span>Just want to view live data?</span>
+      <button class="btn ghost small" id="guestBtn">Continue as viewer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app">
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand-mark">
+       <img src="logotrihybrid.png" width="75" height="75">
+      <div><div class="name" style="font-size:15px;">TRI‑HYBRID BUOY</div><div class="sub">Energy Conversion with Environmental Monitoring</div></div>
+    </div>
+    <div class="mobile-nav-bar">
+      <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-expanded="false" aria-controls="mobileNavMenu" aria-label="Open navigation menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div class="mobile-nav-menu" id="mobileNavMenu">
+    <div class="nav-group primary-nav">
+      <div class="nav-label">OVERVIEW</div>
+      <button class="nav-btn active" data-page="home"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">MONITORING</div>
+      <button class="nav-btn" data-page="env"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v10"/><circle cx="12" cy="16" r="4"/></svg>Environment</button>
+      <button class="nav-btn" data-page="battery"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 10v4" /></svg>Power &amp; Battery</button>
+      <button class="nav-btn" data-page="camera"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Surveillance</button>
+      <button class="nav-btn" data-page="logs"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Data Logs</button>
+    </div>
+    <div class="nav-group" id="adminNavGroup" style="display:none;">
+      <div class="nav-label">ADMIN</div>
+      <button class="nav-btn" data-page="admin"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.97 7.97 0 000-6l1.6-1.2-2-3.4-1.9.7a8 8 0 00-5.2-3L11.5 0h-3l-.4 2.1a8 8 0 00-5.2 3l-1.9-.7-2 3.4L.6 9a7.97 7.97 0 000 6l-1.6 1.2 2 3.4 1.9-.7a8 8 0 005.2 3l.4 2.1h3l.4-2.1a8 8 0 005.2-3l1.9.7 2-3.4z"/></svg>Site Settings</button>
+    </div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="who"><span class="dot"></span><div class="txt"><b id="whoName">Viewer</b><span id="whoRole">Read‑only session</span></div></div>
+      <span class="logout-link" id="logoutBtn">Sign out</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageTitle">HOME</h2>
+        <p id="pageSub">Live overview of the environmental monitoring station</p>
+      </div>
+      <div class="status-chip"><span class="dot"></span><span id="clock">--:--:--</span></div>
+    </div>
+
+    <!-- ---------------- HOME ---------------- -->
+    <section class="page active" id="page-home">
+      <div class="grid cols-4" id="homeMetrics"></div>
+
+      <div class="section-title">POWER SOURCES</div>
+      <div class="grid cols-3" id="homePower"></div>
+
+      <div class="section-title">Recent Alerts</div>
+      <div class="table-scroll"><table id="homeAlerts"><thead><tr><th>Time</th><th>Source</th><th>Event</th><th>Level</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- ---------------- ENVIRONMENT ---------------- -->
+    <section class="page" id="page-env">
+      <div class="grid cols-4" id="envMetrics"></div>
+      <div class="section-title">24‑hour Trend</div>
+      <div class="toolbar">
+        <select id="envChartSelect">
+          <option value="humidity">Humidity</option>
+          <option value="salinity">Salinity</option>
+          <option value="waterTemp">Water Temperature</option>
+          <option value="ph">pH</option>
+        </select>
+      </div>
+      <div class="chart-wrap"><canvas id="envChart"></canvas></div>
+    </section>
+
+    <!-- ---------------- BATTERY / POWER ---------------- -->
+    <section class="page" id="page-battery">
+      <div class="grid cols-2" style="margin-bottom:16px;">
+        <div class="card">
+          <h3>Battery Percentage</h3>
+          <div class="metric" id="socValue">--<span class="unit">%</span></div>
+          <div class="bar-track"><div class="bar-fill" id="socBar" style="background:var(--teal);width:0%;"></div></div>
+          <div class="metric-sub" id="socSub" style="margin-top:8px;">--</div>
+        </div>
+        <div class="card">
+          <h3>Net Power Flow</h3>
+          <div class="metric" id="netPower">--<span class="unit">W</span></div>
+          <div class="metric-sub" id="netPowerSub">Generation minus Load</div>
+        </div>
+      </div>
+      <div class="section-title">Generation by Renewable Sources</div>
+      <div class="grid cols-3" id="sourceCards"></div>
+      <div class="section-title">Combined generation — last hour</div>
+      <div class="chart-wrap"><canvas id="powerChart"></canvas></div>
+    </section>
+
+    <!-- ---------------- CAMERA ---------------- -->
+    <section class="page" id="page-camera">
+      <div class="toolbar">
+        <span style="font-size:13px;color:var(--foam-dim);">4 feeds · station perimeter and equipment bay</span>
+      </div>
+      <div class="cam-grid" id="camGrid"></div>
+    </section>
+
+    <!-- ---------------- DATA LOGS ---------------- -->
+    <section class="page" id="page-logs">
+      <div class="toolbar">
+        <select id="logFilterType">
+          <option value="all">All Readings</option>
+          <option value="humidity">Humidity</option>
+          <option value="salinity">Salinity</option>
+          <option value="waterTemp">Water Temperature</option>
+          <option value="ph">pH</option>
+          <option value="soc">Battery SOC</option>
+        </select>
+        <input type="date" id="logFilterDate">
+        <input type="text" id="logSearch" placeholder="Search notes…">
+        <button class="btn ghost small" id="exportCsvBtn">Export CSV</button>
+        <button class="btn ghost small" id="clearFilterBtn">Clear filters</button>
+      </div>
+      <div class="table-scroll"><table id="logsTable"><thead><tr><th>Timestamp</th><th>Parameter</th><th>Value</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <div class="toolbar" style="justify-content:center;margin-top:16px;">
+        <button class="btn ghost small" id="logsPrev">← Previous</button>
+        <span style="font-size:13px;color:var(--foam-dim);" id="logsPageInfo">Page 1</span>
+        <button class="btn ghost small" id="logsNext">Next →</button>
+      </div>
+    </section>
+
+    <!-- ---------------- ADMIN ---------------- -->
+    <section class="page" id="page-admin">
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:6px;">Alert Thresholds</h3>
+        <div class="settings-row">
+          <div><div class="lbl">Salinity High Limit</div><div class="desc">Trigger a warning above this value (ppt)</div></div>
+          <input type="number" id="thSalinity" step="0.1">
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">pH Low Limit</div><div class="desc">Trigger a warning below this value</div></div>
+          <input type="number" id="thPhLow" step="0.1">
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">pH High Limit</div><div class="desc">Trigger a warning above this value</div></div>
+          <input type="number" id="thPhHigh" step="0.1">
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">Humidity High Limit</div><div class="desc">Trigger a warning above this value (%)</div></div>
+          <input type="number" id="thHumidity" step="0.1">
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">Battery SOC High Limit</div><div class="desc">Trigger a warning above this charge %</div></div>
+          <input type="number" id="thSoc" step="1">
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">Water Temperature High Limit</div><div class="desc">Trigger a warning above this value (°C)</div></div>
+          <input type="number" id="thTemp" step="0.5">
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:6px;">Device simulation</h3>
+        <div class="settings-row">
+          <div><div class="lbl">Solar array</div><div class="desc">Simulated feed on/off</div></div>
+          <div class="toggle on" data-device="solar"><div class="knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">Wind turbine</div><div class="desc">Simulated feed on/off</div></div>
+          <div class="toggle on" data-device="wind"><div class="knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="lbl">Wave converter</div><div class="desc">Simulated feed on/off</div></div>
+          <div class="toggle on" data-device="wave"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <h3 style="margin-bottom:6px;">Admin account</h3>
+        <div class="settings-row" style="display:block;">
+          <div class="field"><label>New username</label><input type="text" id="newUsername" placeholder="admin"></div>
+          <div class="field"><label>New password</label><input type="password" id="newPassword" placeholder="Leave blank to keep current"></div>
+          <button class="btn small" id="saveAccountBtn">Save account changes</button>
+        </div>
+      </div>
+
+      <button class="btn danger small" id="saveThresholdsBtn">Save all settings</button>
+      <button class="btn ghost small" id="enablePushBtn" type="button">Enable notifications</button>
+      <span id="adminSaveMsg" style="margin-left:12px;font-size:13px;color:var(--ok);"></span>
+    </section>
+  </main>
+</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, set, query, orderByKey, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDd0WQCAl1a9r8wN2fiXriC6aTsN4eYNQA",
+    authDomain: "tri-hybrid-buoy.firebaseapp.com",
+    databaseURL: "https://tri-hybrid-buoy-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tri-hybrid-buoy",
+    storageBucket: "tri-hybrid-buoy.firebasestorage.app",
+    messagingSenderId: "105759750345",
+    appId: "1:105759750345:web:6764ecd8270f0010c4f518"
+  };
+  const firebaseApp = initializeApp(firebaseConfig);
+  window.__db = getDatabase(firebaseApp);
+  window.__dbRef = ref;
+  window.__dbOnValue = onValue;
+  window.__dbPush = push;
+  window.__dbSet = set;
+  window.__dbQuery = query;
+  window.__dbOrderByKey = orderByKey;
+  window.__dbLimitToLast = limitToLast;
+
+  // Paste the VAPID key you generated in Firebase Console → Project Settings → Cloud Messaging
+  const VAPID_KEY = "PBLFiX7J3zOqrJFSj5K8oCUncLD1c7h_4dd6f2L1ESw5vsdznX4PcnKfXL1febm2d3Vt8PZBzaMA7ky0UpFjUhLE";
+
+  window.__enablePushNotifications = async function(){
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Notification permission was not granted.');
+        return false;
+      }
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      const messaging = getMessaging(firebaseApp);
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+      if (token) {
+        // Save the token so the Cloud Function knows where to send alerts
+        await set(ref(window.__db, `/fcmTokens/${token}`), true);
+        console.log('Push notifications enabled.');
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to enable push notifications:', err);
+    }
+    return false;
+  };
+
+  // Foreground messages (site open in another tab) still show a browser notification too
+  try {
+    const messaging = getMessaging(firebaseApp);
+    onMessage(messaging, (payload) => {
+      const title = payload.notification?.title || 'Tri-Hybrid Station Alert';
+      const body = payload.notification?.body || '';
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+      }
+    });
+  } catch (e) { /* messaging not supported in this browser */ }
+  
+</script>
+<script src="script.js"></script>
+</body>
+</html>
