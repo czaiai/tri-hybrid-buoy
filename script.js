@@ -1,4 +1,16 @@
 /* ============================================================
+   DATA SOURCE TOGGLE
+   ------------------------------------------------------------
+   true  -> the dashboard generates and displays SAMPLE data
+            locally in the browser. No ESP32 / Firebase needed.
+   false -> the dashboard reads live data from the Firebase
+            Realtime Database (original behavior).
+
+   THIS IS THE ONLY SWITCH YOU NEED TO FLIP LATER.
+   ============================================================ */
+const USE_SIMULATED_DATA = true;
+
+/* ============================================================
    STATE & PERSISTENCE
    ============================================================ */
 const DEFAULTS = {
@@ -23,7 +35,8 @@ let session = { role: null }; // 'admin' | 'viewer'
 
 // Pull the latest admin account once at page load (before login), so a
 // password/username changed on another device is honored here too.
-if (window.__db) {
+// Skipped entirely while USE_SIMULATED_DATA is true.
+if (!USE_SIMULATED_DATA && window.__db) {
   window.__dbOnValue(window.__dbRef(window.__db, '/account'), (snapshot) => {
     const data = snapshot.val();
     if (data) account = data;
@@ -47,7 +60,7 @@ function tick(){
   const hour = new Date().getHours();
   const daylight = hour > 6 && hour < 18 ? Math.sin(((hour-6)/12)*Math.PI) : 0;
 
-  /*live.humidity = wander(live.humidity, 40, 95, 1.2);
+  live.humidity = wander(live.humidity, 40, 95, 1.2);
   live.salinity = wander(live.salinity, 30, 40, 0.3);
   live.waterTemp = wander(live.waterTemp, 22, 33, 0.25);
   live.ph = wander(live.ph, 7.2, 8.8, 0.04);
@@ -59,7 +72,7 @@ function tick(){
 
   const genTotal = live.solarW + live.windW + live.waveW;
   const net = genTotal - live.loadW;
-  live.soc = Math.max(0, Math.min(100, live.soc + net/4000));*/
+  live.soc = Math.max(0, Math.min(100, live.soc + net/4000));
 
   const entry = {
     t: Date.now(),
@@ -180,18 +193,48 @@ function enterApp(){
   populateAdminFields();
   renderAll();
   startClock();
-  if(!window.__firebaseStarted){
-    window.__firebaseStarted = true;
-    startFirebaseSync();
+
+  if (USE_SIMULATED_DATA) {
+    if (!window.__simStarted) {
+      window.__simStarted = true;
+      startSimulatedData();
+    }
+  } else {
+    if (!window.__firebaseStarted) {
+      window.__firebaseStarted = true;
+      startFirebaseSync();
+    }
   }
 }
 
 /* ============================================================
-   FIREBASE SYNC (replaces the old simulated tick() loop)
+   SAMPLE DATA LOOP (used when USE_SIMULATED_DATA is true)
+   Generates fake readings locally instead of reading Firebase.
+   Change the 5000 below to adjust how often values update.
+   ============================================================ */
+function startSimulatedData(){
+  seedHistory();
+  tick();
+  renderAll();
+  if(document.getElementById('page-env').classList.contains('active')) renderEnvChart();
+  if(document.getElementById('page-battery').classList.contains('active')) renderPowerChart();
+  if(document.getElementById('page-logs').classList.contains('active')) renderLogsTable();
+
+  setInterval(() => {
+    tick();
+    renderAll();
+    if(document.getElementById('page-env').classList.contains('active')) renderEnvChart();
+    if(document.getElementById('page-battery').classList.contains('active')) renderPowerChart();
+    if(document.getElementById('page-logs').classList.contains('active')) renderLogsTable();
+  }, 5000);
+}
+
+/* ============================================================
+   FIREBASE SYNC (used when USE_SIMULATED_DATA is false)
    Reads live sensor data pushed by the ESP32 instead of
    generating fake values locally.
    ============================================================ */
-/*function startFirebaseSync(){
+function startFirebaseSync(){
   const db = window.__db;
   const dbRef = window.__dbRef;
   const onValue = window.__dbOnValue;
@@ -580,7 +623,7 @@ document.querySelectorAll('.toggle').forEach(t => {
     devices[dev] = !devices[dev];
     t.classList.toggle('on', devices[dev]);
     saveJSON('th_devices', devices);
-    if (window.__db) window.__dbSet(window.__dbRef(window.__db, `/devices/${dev}`), devices[dev]);
+    if (!USE_SIMULATED_DATA && window.__db) window.__dbSet(window.__dbRef(window.__db, `/devices/${dev}`), devices[dev]);
   });
 });
 document.getElementById('saveThresholdsBtn').addEventListener('click', () => {
@@ -591,7 +634,7 @@ document.getElementById('saveThresholdsBtn').addEventListener('click', () => {
   thresholds.socLow = parseFloat(document.getElementById('thSoc').value);
   thresholds.tempHigh = parseFloat(document.getElementById('thTemp').value);
   saveJSON('th_thresholds', thresholds);
-  if (window.__db) window.__dbSet(window.__dbRef(window.__db, '/thresholds'), thresholds);
+  if (!USE_SIMULATED_DATA && window.__db) window.__dbSet(window.__dbRef(window.__db, '/thresholds'), thresholds);
   const msg = document.getElementById('adminSaveMsg');
   msg.textContent = 'Settings saved.';
   setTimeout(() => msg.textContent = '', 2500);
@@ -602,7 +645,7 @@ document.getElementById('saveAccountBtn').addEventListener('click', () => {
   if(u) account.username = u;
   if(p) account.password = p;
   saveJSON('th_account', account);
-  if (window.__db) window.__dbSet(window.__dbRef(window.__db, '/account'), account);
+  if (!USE_SIMULATED_DATA && window.__db) window.__dbSet(window.__dbRef(window.__db, '/account'), account);
   document.getElementById('whoName').textContent = account.username;
   document.getElementById('newUsername').value = '';
   document.getElementById('newPassword').value = '';
