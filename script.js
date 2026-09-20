@@ -191,7 +191,7 @@ function enterApp(){
    Reads live sensor data pushed by the ESP32 instead of
    generating fake values locally.
    ============================================================ */
-function startFirebaseSync(){
+/*function startFirebaseSync(){
   const db = window.__db;
   const dbRef = window.__dbRef;
   const onValue = window.__dbOnValue;
