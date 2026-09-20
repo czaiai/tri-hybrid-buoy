@@ -47,7 +47,7 @@ function tick(){
   const hour = new Date().getHours();
   const daylight = hour > 6 && hour < 18 ? Math.sin(((hour-6)/12)*Math.PI) : 0;
 
-  live.humidity = wander(live.humidity, 40, 95, 1.2);
+  /*live.humidity = wander(live.humidity, 40, 95, 1.2);
   live.salinity = wander(live.salinity, 30, 40, 0.3);
   live.waterTemp = wander(live.waterTemp, 22, 33, 0.25);
   live.ph = wander(live.ph, 7.2, 8.8, 0.04);
@@ -59,7 +59,7 @@ function tick(){
 
   const genTotal = live.solarW + live.windW + live.waveW;
   const net = genTotal - live.loadW;
-  live.soc = Math.max(0, Math.min(100, live.soc + net/4000));
+  live.soc = Math.max(0, Math.min(100, live.soc + net/4000));*/
 
   const entry = {
     t: Date.now(),
